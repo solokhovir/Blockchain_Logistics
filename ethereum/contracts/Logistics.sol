@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.10;
+pragma solidity >=0.8.0 <0.9.0;
 
 contract Logistics {
     address owner;
@@ -20,7 +20,6 @@ contract Logistics {
     Status status_choice;
 
     struct Admin {
-        // string _name;
         bool _isAdmin;
     }
 
@@ -36,29 +35,101 @@ contract Logistics {
         uint _orderID;
     }
 
+    struct ComponentIncome {
+        string _manufacturerName;
+        address _manufacturerAddress;
+        string _componentName;
+        uint _componentTimestampIncome;
+    }
+
+    struct FinalProduct {
+        string _productName;
+        bytes[] _productComponents;
+
+        uint _finalProductTimestamp;
+    }
+
+    struct OrderedProducts {
+        bytes[] _finalProductUniqueNumbers;
+        uint _orderedProductsTimestamp;
+    }
+
     mapping(address => Admin) public admins;
-    // Order[] public order_info;
+
     mapping(uint => Order) public order_info;
 
     mapping(uint => OrderPayments) public order_payments;
 
+    mapping(bytes32 => ComponentIncome) public component_info;
+
+    mapping(bytes32 => FinalProduct) final_product_info;
+
+    mapping(uint => OrderedProducts) order_with_products;
+
     event ChangeOrderStatus(uint indexed id, address indexed receiver, Status indexed product_status);
     event PaymentStatus(uint indexed id, address indexed customer, uint indexed orderID);
+    event NewComponent(string indexed name, address indexed addressManufacturer, string indexed component, uint timestamp);
+    event FinalProductInfo(string indexed product_name, bytes[] indexed components, uint timestamp);
 
-    function in_production(uint _orderID, address _receiver) public onlyOwner {
+    function component_income(string memory _manufacturer, address _manufacturerAddress, string memory _componentName) public onlyOwner returns (bytes32) {
+        bytes32 uinqueComponentNumber = keccak256(abi.encodePacked(_manufacturer, _componentName, block.timestamp));
+        component_info[uinqueComponentNumber]._manufacturerName = _manufacturer;
+        component_info[uinqueComponentNumber]._manufacturerAddress = _manufacturerAddress;
+        component_info[uinqueComponentNumber]._componentName = _componentName;
+        component_info[uinqueComponentNumber]._componentTimestampIncome = block.timestamp;
+        emit NewComponent(_manufacturer, _manufacturerAddress, _componentName, block.timestamp);
+        return uinqueComponentNumber;
+    }
+
+    function sendMoneyForComponents(address payable _manufacturerAddress) public payable onlyOwner {
+        _manufacturerAddress.transfer(msg.value);
+    }
+
+    function final_product(string memory _productName, bytes[] memory _componentUiniqueNumber) public onlyOwner returns (bytes32) {        
+        bytes32 uinqueProductNumber = keccak256(abi.encodePacked(_productName, block.timestamp));
+        final_product_info[uinqueProductNumber]._productName = _productName;
+        final_product_info[uinqueProductNumber]._productComponents = _componentUiniqueNumber;
+        final_product_info[uinqueProductNumber]._finalProductTimestamp = block.timestamp;
+        emit FinalProductInfo(_productName, _componentUiniqueNumber, block.timestamp);
+        return uinqueProductNumber;
+    }
+
+    function getFullProductInfo(bytes32 _uinqueProductNumber) public view returns (string memory, bytes[] memory, uint) {
+        return (
+            final_product_info[_uinqueProductNumber]._productName,
+            final_product_info[_uinqueProductNumber]._productComponents, 
+            final_product_info[_uinqueProductNumber]._finalProductTimestamp
+            );
+    }
+
+    function createNewOrder(uint orderID, bytes[] memory _finalProductUniqueNumbers) public onlyOwner {
+        order_with_products[orderID]._finalProductUniqueNumbers = _finalProductUniqueNumbers;
+        order_with_products[orderID]._orderedProductsTimestamp = block.timestamp;
+    }
+
+    function getFullOrderInfoForDeparture(uint orderID) public view onlyOwner returns (uint, bytes[] memory, uint) {
+        if (order_with_products[orderID]._orderedProductsTimestamp != 0) {
+            return (
+                orderID,
+                order_with_products[orderID]._finalProductUniqueNumbers,
+                order_with_products[orderID]._orderedProductsTimestamp
+            );
+        } 
+        else {
+            revert("Such orderID not exists!");
+        }
+    }
+
+    function inProduction(uint _orderID, address _receiver) public onlyOwner {
         status_choice = Status.In_Production;
-
         order_info[_orderID]._orderID = _orderID;
         order_info[_orderID]._receiver = _receiver;
         order_info[_orderID]._status = status_choice;
-
-        // order_info.push(Order({_orderID: _orderID, _receiver: _receiver, _status: status_choice}));
         emit ChangeOrderStatus(_orderID, _receiver, status_choice);
     }
 
     function paid(uint _orderID, address _receiver) public onlyOwner {
         status_choice = Status.Paid;
-        // order_info.push(Order({_orderID: _orderID, _receiver: _receiver, _status: status_choice}));
         order_info[_orderID]._orderID = _orderID;
         order_info[_orderID]._receiver = _receiver;
         order_info[_orderID]._status = status_choice;
@@ -66,9 +137,8 @@ contract Logistics {
         emit ChangeOrderStatus(_orderID, _receiver, status_choice);
     }
 
-    function in_stock(uint _orderID, address _receiver) public onlyOwner {
+    function inStock(uint _orderID, address _receiver) public onlyOwner {
         status_choice = Status.In_Stock;
-        // order_info.push(Order({_orderID: _orderID, _receiver: _receiver, _status: status_choice}));
         order_info[_orderID]._orderID = _orderID;
         order_info[_orderID]._receiver = _receiver;
         order_info[_orderID]._status = status_choice;
@@ -78,7 +148,6 @@ contract Logistics {
 
     function delivered(uint _orderID, address _receiver) public onlyOwner {
         status_choice = Status.Delivered;
-        // order_info.push(Order({_orderID: _orderID, _receiver: _receiver, _status: status_choice}));
         order_info[_orderID]._orderID = _orderID;
         order_info[_orderID]._receiver = _receiver;
         order_info[_orderID]._status = status_choice;
@@ -93,7 +162,6 @@ contract Logistics {
 
     function sent(uint _orderID, address _receiver) public onlyOwner {
         status_choice = Status.Sent;
-        // order_info.push(Order({_orderID: _orderID, _receiver: _receiver, _status: status_choice}));
         order_info[_orderID]._orderID = _orderID;
         order_info[_orderID]._receiver = _receiver;
         order_info[_orderID]._status = status_choice;
@@ -103,7 +171,6 @@ contract Logistics {
 
     function canceled(uint _orderID, address _receiver) public onlyOwner {
         status_choice = Status.Canceled;
-        // order_info.push(Order({_orderID: _orderID, _receiver: _receiver, _status: status_choice}));
         order_info[_orderID]._orderID = _orderID;
         order_info[_orderID]._receiver = _receiver;
         order_info[_orderID]._status = status_choice;
@@ -113,7 +180,6 @@ contract Logistics {
 
     function returned(uint _orderID, address _receiver) public onlyOwner {
         status_choice = Status.Returned_To_Warehouse;
-        // order_info.push(Order({_orderID: _orderID, _receiver: _receiver, _status: status_choice}));
         order_info[_orderID]._orderID = _orderID;
         order_info[_orderID]._receiver = _receiver;
         order_info[_orderID]._status = status_choice;
@@ -121,7 +187,7 @@ contract Logistics {
         emit ChangeOrderStatus(_orderID, _receiver, status_choice);
     }
 
-    function receiveMoney(uint _ID) public payable {
+    function sendMoneyForOrder(uint _ID) public payable {
         balanceReceived = msg.value;
         order_payments[_ID]._customer = msg.sender;
         order_payments[_ID]._amount = balanceReceived;

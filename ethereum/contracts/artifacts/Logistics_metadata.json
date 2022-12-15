@@ -1,6 +1,6 @@
 {
 	"compiler": {
-		"version": "0.8.10+commit.fc410830"
+		"version": "0.8.7+commit.e28d00a7"
 	},
 	"language": "Solidity",
 	"output": {
@@ -33,6 +33,62 @@
 					}
 				],
 				"name": "ChangeOrderStatus",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "string",
+						"name": "product_name",
+						"type": "string"
+					},
+					{
+						"indexed": true,
+						"internalType": "bytes[]",
+						"name": "components",
+						"type": "bytes[]"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "timestamp",
+						"type": "uint256"
+					}
+				],
+				"name": "FinalProductInfo",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "addressManufacturer",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "string",
+						"name": "component",
+						"type": "string"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "timestamp",
+						"type": "uint256"
+					}
+				],
+				"name": "NewComponent",
 				"type": "event"
 			},
 			{
@@ -90,11 +146,6 @@
 				"name": "admins",
 				"outputs": [
 					{
-						"internalType": "string",
-						"name": "_name",
-						"type": "string"
-					},
-					{
 						"internalType": "bool",
 						"name": "_isAdmin",
 						"type": "bool"
@@ -124,6 +175,87 @@
 			{
 				"inputs": [
 					{
+						"internalType": "string",
+						"name": "_manufacturer",
+						"type": "string"
+					},
+					{
+						"internalType": "address",
+						"name": "_manufacturerAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "_componentName",
+						"type": "string"
+					}
+				],
+				"name": "component_income",
+				"outputs": [
+					{
+						"internalType": "bytes32",
+						"name": "",
+						"type": "bytes32"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "",
+						"type": "bytes32"
+					}
+				],
+				"name": "component_info",
+				"outputs": [
+					{
+						"internalType": "string",
+						"name": "_manufacturerName",
+						"type": "string"
+					},
+					{
+						"internalType": "address",
+						"name": "_manufacturerAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "_componentName",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_componentTimestampIncome",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "orderID",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bytes[]",
+						"name": "_finalProductUniqueNumbers",
+						"type": "bytes[]"
+					}
+				],
+				"name": "createNewOrder",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
 						"internalType": "uint256",
 						"name": "_orderID",
 						"type": "uint256"
@@ -142,6 +274,88 @@
 			{
 				"inputs": [
 					{
+						"internalType": "string",
+						"name": "_productName",
+						"type": "string"
+					},
+					{
+						"internalType": "bytes[]",
+						"name": "_componentUiniqueNumber",
+						"type": "bytes[]"
+					}
+				],
+				"name": "final_product",
+				"outputs": [
+					{
+						"internalType": "bytes32",
+						"name": "",
+						"type": "bytes32"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "orderID",
+						"type": "uint256"
+					}
+				],
+				"name": "getFullOrderInfoForDeparture",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bytes[]",
+						"name": "",
+						"type": "bytes[]"
+					},
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "_uinqueProductNumber",
+						"type": "bytes32"
+					}
+				],
+				"name": "getFullProductInfo",
+				"outputs": [
+					{
+						"internalType": "string",
+						"name": "",
+						"type": "string"
+					},
+					{
+						"internalType": "bytes[]",
+						"name": "",
+						"type": "bytes[]"
+					},
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
 						"internalType": "uint256",
 						"name": "_orderID",
 						"type": "uint256"
@@ -152,7 +366,7 @@
 						"type": "address"
 					}
 				],
-				"name": "in_production",
+				"name": "inProduction",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
@@ -170,7 +384,7 @@
 						"type": "address"
 					}
 				],
-				"name": "in_stock",
+				"name": "inStock",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
@@ -255,19 +469,6 @@
 				"inputs": [
 					{
 						"internalType": "uint256",
-						"name": "_ID",
-						"type": "uint256"
-					}
-				],
-				"name": "receiveMoney",
-				"outputs": [],
-				"stateMutability": "payable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "uint256",
 						"name": "_orderID",
 						"type": "uint256"
 					},
@@ -280,6 +481,32 @@
 				"name": "returned",
 				"outputs": [],
 				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address payable",
+						"name": "_manufacturerAddress",
+						"type": "address"
+					}
+				],
+				"name": "sendMoneyForComponents",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_ID",
+						"type": "uint256"
+					}
+				],
+				"name": "sendMoneyForOrder",
+				"outputs": [],
+				"stateMutability": "payable",
 				"type": "function"
 			},
 			{
@@ -314,7 +541,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"contracts/Lock.sol": "Logistics"
+			"ethereum/contracts/Logistics.sol": "Logistics"
 		},
 		"evmVersion": "london",
 		"libraries": {},
@@ -328,12 +555,12 @@
 		"remappings": []
 	},
 	"sources": {
-		"contracts/Lock.sol": {
-			"keccak256": "0xe6209a5866f0eaf924bd57152c188859228448741defa4efd12a15b3f03af40c",
+		"ethereum/contracts/Logistics.sol": {
+			"keccak256": "0x751bd6fa8f0ff11e3d1b70cd2cab26e4cbb8817573f2a6f5f0c7cc725fbe4ae5",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://82bebde9139060f3c07e9731be323e5042c0fbcc147e0d2082cb04b6e631392e",
-				"dweb:/ipfs/QmUgJRtCB4cYDRA9DdAWpQ1rfeSMvSRBQUYKbRHiUBZftu"
+				"bzz-raw://a5ada42b98b70f817031d2373bf0d676c611de86a00b4affbcfde2de7a399440",
+				"dweb:/ipfs/QmYzbP6MRPq6x9zHgX1iSmaXv7u77p8EagyHWBfQc3N8Ut"
 			]
 		}
 	},
